@@ -6,6 +6,8 @@ import (
 	"io"
 	"net"
 	"sync"
+
+	"github.com/shadowsocks/go-shadowsocks2/core/filter"
 )
 
 // ErrShortPacket means that the packet is too short for a valid encrypted packet.
@@ -27,6 +29,7 @@ func Pack(dst, plaintext []byte, ciph Cipher) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+	filter.Add(salt)
 
 	if len(dst) < saltSize+len(plaintext)+aead.Overhead() {
 		return nil, io.ErrShortBuffer
@@ -43,10 +46,14 @@ func Unpack(dst, pkt []byte, ciph Cipher) ([]byte, error) {
 		return nil, ErrShortPacket
 	}
 	salt := pkt[:saltSize]
+	if filter.Check(salt) {
+		return nil, ErrRepeatSaltDetected
+	}
 	aead, err := ciph.Decrypter(salt)
 	if err != nil {
 		return nil, err
 	}
+	filter.Add(salt)
 	if len(pkt) < saltSize+aead.Overhead() {
 		return nil, ErrShortPacket
 	}

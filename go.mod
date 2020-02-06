@@ -4,6 +4,9 @@ go 1.12
 
 require (
 	github.com/aead/chacha20 v0.0.0-20180709150244-8b13a72661da
+	github.com/spaolacci/murmur3 v1.1.0 // indirect
+	github.com/willf/bitset v1.1.10 // indirect
+	github.com/willf/bloom v2.0.3+incompatible
 	golang.org/x/crypto v0.0.0-20190426145343-a29dc8fdc734
 )
 
