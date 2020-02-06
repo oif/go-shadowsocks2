@@ -6,6 +6,8 @@ import (
 	"crypto/rand"
 	"io"
 	"net"
+
+	"github.com/shadowsocks/go-shadowsocks2/core/filter"
 )
 
 // payloadSizeMask is the maximum size of payload in bytes.
@@ -203,11 +205,14 @@ func (c *streamConn) initReader() error {
 	if _, err := io.ReadFull(c.Conn, salt); err != nil {
 		return err
 	}
-
+	if filter.Check(salt) {
+		return ErrRepeatSaltDetected
+	}
 	aead, err := c.Decrypter(salt)
 	if err != nil {
 		return err
 	}
+	filter.Add(salt)
 
 	c.r = newReader(c.Conn, aead)
 	return nil
@@ -244,6 +249,7 @@ func (c *streamConn) initWriter() error {
 	if err != nil {
 		return err
 	}
+	filter.Add(salt)
 	c.w = newWriter(c.Conn, aead)
 	return nil
 }

@@ -4,12 +4,16 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/sha1"
+	"errors"
 	"io"
 	"strconv"
 
 	"golang.org/x/crypto/chacha20poly1305"
 	"golang.org/x/crypto/hkdf"
 )
+
+// ErrRepeatSaltDetected means detected a reused salt
+var ErrRepeatSaltDetected = errors.New("repeat salt detected")
 
 type Cipher interface {
 	KeySize() int
